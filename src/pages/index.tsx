@@ -3,6 +3,7 @@ import Head from "next/head";
 import Link from "next/link";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "@/utils/api";
+import { useClerk } from "@clerk/clerk-react";
 
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -48,6 +49,7 @@ const Home: NextPage = () => {
               {hello.data ? hello.data.greeting : "Loading tRPC query..."}
             </p>
           </div>
+          <SignOutButton />
         </div>
       </main>
     </>
@@ -55,6 +57,11 @@ const Home: NextPage = () => {
 };
 
 export default Home;
+
+const SignOutButton = () => {
+  const { signOut } = useClerk();
+  return <button onClick={() => signOut()}>Sign out</button>;
+};
 
 const AuthShowcase: React.FC = () => {
   const { data: sessionData } = useSession();
