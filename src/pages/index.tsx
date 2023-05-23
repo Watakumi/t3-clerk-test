@@ -1,9 +1,9 @@
 import { type NextPage } from "next";
 import Head from "next/head";
 import Link from "next/link";
-import { signIn, signOut, useSession } from "next-auth/react";
 import { api } from "@/utils/api";
 import { useClerk } from "@clerk/clerk-react";
+import { useAuth } from "@clerk/nextjs";
 
 const Home: NextPage = () => {
   const hello = api.example.hello.useQuery({ text: "from tRPC" });
@@ -49,7 +49,7 @@ const Home: NextPage = () => {
               {hello.data ? hello.data.greeting : "Loading tRPC query..."}
             </p>
           </div>
-          <SignOutButton />
+          <AuthShowcase />
         </div>
       </main>
     </>
@@ -64,24 +64,30 @@ const SignOutButton = () => {
 };
 
 const AuthShowcase: React.FC = () => {
-  const { data: sessionData } = useSession();
+  const { isLoaded, userId } = useAuth();
+  const { signOut, redirectToSignIn } = useClerk();
 
   const { data: secretMessage } = api.example.getSecretMessage.useQuery(
     undefined, // no input
-    { enabled: sessionData?.user !== undefined }
+    { enabled: userId !== null }
   );
+
+  // In case the user signs out while on the page.
+  if (!isLoaded || !userId) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <div className="flex flex-col items-center justify-center gap-4">
       <p className="text-center text-2xl text-white">
-        {sessionData && <span>Logged in as {sessionData.user?.name}</span>}
+        {userId && <span>Logged in as {userId}</span>}
         {secretMessage && <span> - {secretMessage}</span>}
       </p>
       <button
         className="rounded-full bg-white/10 px-10 py-3 font-semibold text-white no-underline transition hover:bg-white/20"
-        onClick={sessionData ? () => void signOut() : () => void signIn()}
+        onClick={userId ? () => void signOut() : () => void redirectToSignIn()}
       >
-        {sessionData ? "Sign out" : "Sign in"}
+        {userId ? "Sign out" : "Sign in"}
       </button>
     </div>
   );
