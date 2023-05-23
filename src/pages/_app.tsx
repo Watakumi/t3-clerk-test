@@ -3,10 +3,11 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { api } from "@/utils/api";
 
 import "@/styles/globals.css";
+import { jaJP } from "../utils/localization";
 
 const MyApp: AppType = ({ Component, pageProps }) => {
   return (
-    <ClerkProvider>
+    <ClerkProvider localization={jaJP}>
       <Component {...pageProps} />
     </ClerkProvider>
   );
